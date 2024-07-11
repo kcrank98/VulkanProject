@@ -31,6 +31,9 @@ class Renderer
 	VkDeviceMemory vertexData = nullptr;
 
 	// TODO: Part 1g
+	VkBuffer indexHandle = nullptr;
+	VkDeviceMemory indexData = nullptr;
+
 	// TODO: Part 2c
 	VkShaderModule vertexShader = nullptr;
 	VkShaderModule fragmentShader = nullptr;
@@ -82,6 +85,7 @@ private:
 		GetHandlesFromSurface();
 		InitializeVertexBuffer();
 		// TODO: Part 1g
+		InitializeIndexBuffer();
 		// TODO: Part 2d // TODO: Part 3d
 		CompileShaders();
 		InitializeGraphicsPipeline();
@@ -97,14 +101,20 @@ private:
 	void InitializeVertexBuffer()
 	{
 		// TODO: Part 1c
-		float verts[] = 
+		/*float verts[] = 
 		{
 			0,   0.5f,
 			0.5f, -0.5f,
 			-0.5f, -0.5f
-		};
+		};*/
 
 		CreateVertexBuffer(&FSLogo_vertices[0], sizeof(FSLogo_vertices));
+	}
+
+	void InitializeIndexBuffer()
+	{
+		// TODO: Part 1g
+		CreateIndexBuffer(&FSLogo_indices[0], sizeof(FSLogo_indices));
 	}
 
 	void CreateVertexBuffer(const void* data, unsigned int sizeInBytes)
@@ -114,6 +124,14 @@ private:
 			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexHandle, &vertexData);
 		// Transfer triangle data to the vertex buffer. (staging would be prefered here)
 		GvkHelper::write_to_buffer(device, vertexData, data, sizeInBytes);
+	}
+
+	void CreateIndexBuffer(const void* data, unsigned int sizeInBytes)
+	{
+		GvkHelper::create_buffer(physicalDevice, device, sizeInBytes,
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &indexHandle, &indexData);
+		GvkHelper::write_to_buffer(device, indexData, data, sizeInBytes);
 	}
 
 	void CompileShaders()
@@ -443,9 +461,11 @@ public:
 		SetUpPipeline(commandBuffer);
 		// TODO: Part 3i
 		// TODO: Part 1h
+		vkCmdBindIndexBuffer(commandBuffer, indexHandle, 0, VK_INDEX_TYPE_UINT32);
+
 		// TODO: Part 2e
 		// TODO: Part 3f
-		vkCmdDraw(commandBuffer, ARRAYSIZE(FSLogo_vertices), 1, 0, 0); // TODO: Part 1d
+		vkCmdDrawIndexed(commandBuffer, ARRAYSIZE(FSLogo_indices), 1, 0, 0, 0); // TODO: Part 1d
 	}
 
 private:
@@ -494,6 +514,9 @@ private:
 		vkDeviceWaitIdle(device);
 		// Release allocated buffers, shaders & pipeline
 		// TODO: Part 1g
+		vkDestroyBuffer(device, indexHandle, nullptr);
+		vkFreeMemory(device, indexData, nullptr);
+
 		// TODO: Part 2d
 		// TODO: Part 3d
 		vkDestroyBuffer(device, vertexHandle, nullptr);
