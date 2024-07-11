@@ -1,5 +1,11 @@
 // an ultra simple hlsl fragment shader
 // TODO: Part 2c // TODO: Part 4d
+cbuffer SHADER_SCENE_DATA
+{
+    float4 lightDirection, lightColor;
+    matrix viewMatrix, projectionMatrix;
+};
+
 // TODO: Part 3b
 // TODO: Part 3c
 // TODO: Part 4a (optional)

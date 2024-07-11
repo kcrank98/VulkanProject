@@ -43,6 +43,13 @@ class Renderer
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout pipelineLayout = nullptr;
 	// TODO: Part 2d
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSets;
+
+	std::vector<VkBuffer> uniformHandles;
+	std::vector<VkDeviceMemory> uniformDatas;
+
 	// TODO: Part 3d
 	unsigned int windowWidth, windowHeight;
 
@@ -80,6 +87,7 @@ class Renderer
 	};
 	SHADER_SCENE_DATA sceneData;
 
+	unsigned swapChainCount;
 	// TODO: Part 3a
 
 public:
@@ -93,6 +101,10 @@ public:
 		// TODO: Part 2a
 		matrixMath.Create();
 		vlk.GetAspectRatio(aspectRatio);
+		vlk.GetSwapchainImageCount(swapChainCount);
+		descriptorSets.resize(swapChainCount);
+		uniformDatas.resize(swapChainCount);
+		uniformHandles.resize(swapChainCount);
 		createViewMatrix();
 		createProjectionMatrix(65);
 		createRotTranMatrix(65);
@@ -123,7 +135,9 @@ private:
 		// TODO: Part 1g
 		InitializeIndexBuffer();
 		// TODO: Part 2d // TODO: Part 3d
+		InitializeUniformBuffer();
 		CompileShaders();
+		InitializeDescriptorSets();
 		InitializeGraphicsPipeline();
 	}
 
@@ -151,6 +165,11 @@ private:
 	{
 		// TODO: Part 1g
 		CreateIndexBuffer(&FSLogo_indices[0], sizeof(FSLogo_indices));
+	}
+
+	void InitializeUniformBuffer()
+	{
+		CreateUniformBuffer(&sceneData, sizeof(SHADER_SCENE_DATA));
 	}
 
 	float DegreesToRadians(float degrees) {
@@ -191,6 +210,18 @@ private:
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &indexHandle, &indexData);
 		GvkHelper::write_to_buffer(device, indexData, data, sizeInBytes);
+	}
+
+	void CreateUniformBuffer(const void* _data, unsigned int sizeInBytes)
+	{
+		for (unsigned i = 0; i < uniformHandles.size(); i++)
+		{
+			GvkHelper::create_buffer(physicalDevice, device, sizeInBytes, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				&uniformHandles[i], &uniformDatas[i]);
+			GvkHelper::write_to_buffer(device, uniformDatas[i], _data, sizeInBytes);
+		}
+
 	}
 
 	void CompileShaders()
@@ -260,6 +291,107 @@ private:
 			(char*)shaderc_result_get_bytes(result), &fragmentShader);
 		
 		shaderc_result_release(result); // done
+	}
+
+	void CreateDescriptorSetLayout() {
+
+		VkDescriptorSetLayoutBinding layoutBinding[1];
+		{
+			layoutBinding[0].binding = 0; // Binding number in the shader
+			layoutBinding[0].descriptorCount = 1;
+			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			layoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+			layoutBinding[0].pImmutableSamplers = nullptr; // For sampled images
+
+			//layoutBinding[1].binding = 1; // Binding number in the shader
+			//layoutBinding[1].descriptorCount = 1;
+			//layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			//layoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+			//layoutBinding[1].pImmutableSamplers = nullptr; // For sampled images
+		};
+		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.flags = 0; //maybe?
+		layoutInfo.bindingCount = ARRAYSIZE(layoutBinding);
+		layoutInfo.pBindings = layoutBinding;
+		layoutInfo.pNext = nullptr; //maybe?
+
+		auto result = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout);
+		int h = 90;
+
+	}
+
+	void CreateDescriptorPool() {
+
+		VkDescriptorPoolCreateInfo poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, swapChainCount };
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = swapChainCount;
+		poolInfo.flags = 0;
+		poolInfo.pNext = nullptr;
+		vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool);
+		/*poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = swapChainCount;*/
+
+	}
+
+	void AllocateDescriptorSet() {
+
+		VkDescriptorSetAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorSetCount = 1;
+		allocInfo.pSetLayouts = &descriptorSetLayout;
+		allocInfo.descriptorPool = descriptorPool;
+		allocInfo.pNext = nullptr;
+
+		for (auto& i : descriptorSets) {
+			auto result = vkAllocateDescriptorSets(device, &allocInfo, &i);
+			int k = 69;
+		}
+	}
+
+	void LinkDescriptorSet2Buffer() {
+
+		//VkDescriptorBufferInfo bufferInfo = {};
+		//bufferInfo.buffer = sceneDataHandles[0]; // Your storage buffer handle
+		////bufferInfo.buffer = vertexHandle;
+		//bufferInfo.offset = 0; // Offset within the buffer
+		//bufferInfo.range = VK_WHOLE_SIZE; // Size of the buffer
+
+		VkWriteDescriptorSet descriptorWrite = {};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		//descriptorWrite.descriptorCount = descriptorSets.size(); // Number of descriptors to update
+		descriptorWrite.descriptorCount = 1; // Number of descriptors to update
+		descriptorWrite.dstArrayElement = 0; // First array element to update
+		descriptorWrite.dstBinding = 0; // The binding number in the shader
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // Type of the descriptor
+		//descriptorWrite.dstSet = descriptorSets[0]; // The descriptor set to update
+		//descriptorWrite.pBufferInfo = &bufferInfo; // Pointer to the buffer info
+
+		for (int i = 0; i < swapChainCount; ++i) {
+			descriptorWrite.dstSet = descriptorSets[i];
+			VkDescriptorBufferInfo dbinfo = { uniformHandles[i], 0, VK_WHOLE_SIZE };
+			descriptorWrite.pBufferInfo = &dbinfo;
+			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+		}
+
+		//descriptorWrite.pImageInfo = nullptr; // For image descriptors, not used here
+		//descriptorWrite.pTexelBufferView = nullptr; // For texel buffer views, not used here
+
+		// Update the descriptor set with the new buffer binding
+		//vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+
+	}
+
+	void InitializeDescriptorSets() {
+
+		CreateDescriptorSetLayout();
+		CreateDescriptorPool();
+		AllocateDescriptorSet();
+		LinkDescriptorSet2Buffer();
+
 	}
 
 	void InitializeGraphicsPipeline()
@@ -492,8 +624,8 @@ private:
 		// TODO: Part 2d // TODO: Part 3d
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
 		pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipeline_layout_create_info.setLayoutCount = 0;
-		pipeline_layout_create_info.pSetLayouts = VK_NULL_HANDLE;
+		pipeline_layout_create_info.setLayoutCount = 1;
+		pipeline_layout_create_info.pSetLayouts = &descriptorSetLayout;
 		pipeline_layout_create_info.pushConstantRangeCount = 0;
 		pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
@@ -510,6 +642,19 @@ private:
 			});
 	}
 
+	//void Update()
+	//{
+	//	// Adjust CPU data to reflect what we want to draw
+	//	for (int i = 0; i < 240; ++i) {
+	//		GW::MATH::GMatrix::RotateZLocalF(instanceData.instance_transforms[i],
+	//			0.0001f, instanceData.instance_transforms[i]);
+	//	}
+	//	// Copy data to this frame's buffer
+	//	unsigned int currentBuffer;
+	//	vlk.GetSwapchainCurrentImage(currentBuffer);
+	//	GvkHelper::write_to_buffer(device,
+	//		uniformData[currentBuffer], &instanceData, sizeof(INSTANCE_UNIFORMS));
+	//}
 
 public:
 	void Render()
@@ -523,6 +668,10 @@ public:
 		vkCmdBindIndexBuffer(commandBuffer, indexHandle, 0, VK_INDEX_TYPE_UINT32);
 
 		// TODO: Part 2e
+		GvkHelper::write_to_buffer(device, uniformDatas[0], &sceneData, sizeof(sceneData));
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout, 0, 1, &descriptorSets[0], 0, NULL);
+
 		// TODO: Part 3f
 		vkCmdDrawIndexed(commandBuffer, ARRAYSIZE(FSLogo_indices), 1, 0, 0, 0); // TODO: Part 1d
 	}
@@ -577,6 +726,9 @@ private:
 		vkFreeMemory(device, indexData, nullptr);
 
 		// TODO: Part 2d
+		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+
 		// TODO: Part 3d
 		vkDestroyBuffer(device, vertexHandle, nullptr);
 		vkFreeMemory(device, vertexData, nullptr);

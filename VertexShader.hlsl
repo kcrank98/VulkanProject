@@ -8,6 +8,12 @@ struct In_Vertex
 };
 
 // TODO: Part 2c // TODO: Part 4d
+cbuffer SHADER_SCENE_DATA
+{
+    float4 lightDirection, lightColor;
+    matrix viewMatrix, projectionMatrix;
+};
+
 // TODO: Part 3b
 // TODO: Part 3c
 // TODO: Part 4a
@@ -22,6 +28,8 @@ float4 main(In_Vertex inputVertex : POSITION) : SV_POSITION
 	
 	// TODO: Part 3g
 	// TODO: Part 2f
+    inputVertex.posH = mul(viewMatrix, float4(inputVertex.posH, 1));
+    inputVertex.posH = mul(projectionMatrix, float4(inputVertex.posH, 1));
 	// TODO: Part 3h
 	// TODO: Part 4b
 	return float4(inputVertex.posH, 1);
