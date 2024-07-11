@@ -7,6 +7,13 @@ struct In_Vertex
     float3 nrm : NORMAL;
 };
 
+struct Out_Vertex
+{
+    float4 posH : POSITION;
+    float4 clr : COLOR;
+    float4 nrm : NORMAL;
+};
+
 // TODO: Part 2c // TODO: Part 4d
 cbuffer SHADER_SCENE_DATA
 {
@@ -23,14 +30,17 @@ cbuffer SHADER_SCENE_DATA
 float4 main(In_Vertex inputVertex : POSITION) : SV_POSITION 
 {
 	// TODO: Part 1h
-    inputVertex.posH.y += -0.75f;
-    inputVertex.posH.z += 0.75f;
+    //inputVertex.posH.y += -0.75f;
+    //inputVertex.posH.z += 0.75f;
+    
+    Out_Vertex outputVertex = (Out_Vertex) 0;
+    outputVertex.posH = float4(inputVertex.posH, 1);
 	
 	// TODO: Part 3g
 	// TODO: Part 2f
-    inputVertex.posH = mul(viewMatrix, float4(inputVertex.posH, 1));
-    inputVertex.posH = mul(projectionMatrix, float4(inputVertex.posH, 1));
+    outputVertex.posH = mul(viewMatrix, outputVertex.posH);
+    outputVertex.posH = mul(projectionMatrix, outputVertex.posH);
 	// TODO: Part 3h
 	// TODO: Part 4b
-	return float4(inputVertex.posH, 1);
+    return outputVertex.posH;
 }
