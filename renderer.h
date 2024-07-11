@@ -29,6 +29,7 @@ class Renderer
 	VkRenderPass renderPass;
 	VkBuffer vertexHandle = nullptr;
 	VkDeviceMemory vertexData = nullptr;
+
 	// TODO: Part 1g
 	// TODO: Part 2c
 	VkShaderModule vertexShader = nullptr;
