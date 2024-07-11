@@ -276,7 +276,7 @@ private:
 		// TODO: Part 1e
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(float) * 2;
+		retval.stride = sizeof(VERT3);
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
