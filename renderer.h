@@ -22,7 +22,6 @@ class Renderer
 	GW::SYSTEM::GWindow win;
 	GW::GRAPHICS::GVulkanSurface vlk;
 	GW::CORE::GEventReceiver shutdown;
-	
 	// what we need at a minimum to draw a triangle
 	VkDevice device = nullptr;
 	VkPhysicalDevice physicalDevice = nullptr;
