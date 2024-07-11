@@ -1,4 +1,5 @@
 // TODO: Part 1b
+#include "FSLogo.h"
 #include "shaderc/shaderc.h" // needed for compiling shaders at runtime
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
 	#pragma comment(lib, "shaderc_combined.lib") 
@@ -93,7 +94,7 @@ private:
 			-0.5f, -0.5f
 		};
 
-		CreateVertexBuffer(&verts[0], sizeof(verts));
+		CreateVertexBuffer(&FSLogo_vertices[0], sizeof(FSLogo_vertices));
 	}
 
 	void CreateVertexBuffer(const void* data, unsigned int sizeInBytes)
