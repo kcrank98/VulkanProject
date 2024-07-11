@@ -44,6 +44,16 @@ class Renderer
 	// TODO: Part 2a
 	// TODO: Part 2b // TODO: Part 4d
 	// TODO: Part 3a
+	struct VEC3
+	{
+		float x, y, z;
+	};
+
+	struct VERT3
+	{
+		VEC3 pos, uvw, nrm;
+	};
+
 public:
 
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
@@ -194,13 +204,23 @@ private:
 		VkPipelineInputAssemblyStateCreateInfo assembly_create_info = CreateVkPipelineInputAssemblyStateCreateInfo();
 		VkVertexInputBindingDescription vertex_binding_description = CreateVkVertexInputBindingDescription();
 
-		VkVertexInputAttributeDescription vertex_attribute_description[1];
+		VkVertexInputAttributeDescription vertex_attribute_description[3];
 		vertex_attribute_description[0].binding = 0;
 		vertex_attribute_description[0].location = 0;
-		vertex_attribute_description[0].format = VK_FORMAT_R32G32_SFLOAT;
+		vertex_attribute_description[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		vertex_attribute_description[0].offset = 0;
 
-		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description, 1);
+		vertex_attribute_description[1].binding = 0;
+		vertex_attribute_description[1].location = 1;
+		vertex_attribute_description[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		vertex_attribute_description[1].offset = 12;
+
+		vertex_attribute_description[2].binding = 0;
+		vertex_attribute_description[2].location = 2;
+		vertex_attribute_description[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+		vertex_attribute_description[2].offset = 24;
+
+		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description, 3);
 		VkViewport viewport = CreateViewportFromWindowDimensions();
 		VkRect2D scissor = CreateScissorFromWindowDimensions(); 
 		VkPipelineViewportStateCreateInfo viewport_create_info = CreateVkPipelineViewportStateCreateInfo(&viewport, 1, &scissor, 1);
