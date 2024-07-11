@@ -729,6 +729,13 @@ private:
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
+		for (auto& i : uniformHandles) {
+			vkDestroyBuffer(device, i, nullptr);
+		}
+		for (auto& i : uniformDatas) {
+			vkFreeMemory(device, i, nullptr);
+		}
+
 		// TODO: Part 3d
 		vkDestroyBuffer(device, vertexHandle, nullptr);
 		vkFreeMemory(device, vertexData, nullptr);
