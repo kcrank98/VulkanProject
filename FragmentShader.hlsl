@@ -10,7 +10,7 @@ float4 main() : SV_TARGET
 {
 	// TODO: Part 3e
 	// TODO: Part 3h
-	return float4(0.75f ,0.75f, 0.25f, 0); // TODO: Part 1a (optional)
+    return float4(1.0f, 1.0f, 1.0f, 0); // TODO: Part 1a (optional)
 	// TODO: Part 4c
 	// TODO: Part 4d (half-vector or reflect method, your choice)
 }
