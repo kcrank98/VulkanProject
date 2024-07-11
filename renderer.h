@@ -110,6 +110,7 @@ public:
 		createRotTranMatrix(65);
 
 		// TODO: Part 2b // TODO: Part 4d
+		//SHADER_SCENE_DATA sceneData;
 		sceneData.lightColor = lightColor;
 		sceneData.lightDirection = lightDir;
 		sceneData.viewMatrix = cameraInvertedMatrix;
@@ -661,6 +662,11 @@ public:
 	{
 		// TODO: Part 3i
 		// TODO: Part 2a
+		sceneData.lightColor = lightColor;
+		sceneData.lightDirection = lightDir;
+		sceneData.viewMatrix = cameraInvertedMatrix;
+		sceneData.projectionMatrix = projectionMatrix;
+
 		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
 		// TODO: Part 3i
