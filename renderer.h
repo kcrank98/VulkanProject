@@ -5,6 +5,8 @@
 	#pragma comment(lib, "shaderc_combined.lib") 
 #endif
 
+#define PI 3.14f
+
 void PrintLabeledDebugString(const char* label, const char* toPrint)
 {
 	std::cout << label << toPrint << std::endl;
@@ -44,9 +46,6 @@ class Renderer
 	// TODO: Part 3d
 	unsigned int windowWidth, windowHeight;
 
-	// TODO: Part 2a
-	// TODO: Part 2b // TODO: Part 4d
-	// TODO: Part 3a
 	struct VEC3
 	{
 		float x, y, z;
@@ -57,6 +56,32 @@ class Renderer
 		VEC3 pos, uvw, nrm;
 	};
 
+	// TODO: Part 2a
+	GW::MATH::GMatrix matrixMath;
+	GW::MATH::GMATRIXF cameraMatrix = GW::MATH::GIdentityMatrixF;
+	GW::MATH::GMATRIXF cameraInvertedMatrix = GW::MATH::GIdentityMatrixF;
+	GW::MATH::GMATRIXF projectionMatrix = GW::MATH::GIdentityMatrixF;
+
+	GW::MATH::GVECTORF translateCamera = { 0.75f, 0.25f, -1.5f, 0 }; //can the z be more than 1?
+	GW::MATH::GVECTORF translateLight = { 1.0f, 1.0f, 1.0f, 0 };
+	GW::MATH::GVECTORF origin = { 0.15f, 0.75f, 0, 1 };
+	GW::MATH::GVECTORF upVec = { 0, 1, 0, 0 };
+	float aspectRatio = 0.0f;
+
+	GW::MATH::GMATRIXF lightRotX = GW::MATH::GIdentityMatrixF;
+	GW::MATH::GVECTORF lightDir = { -1, -1, 2, 0 }; //normalize this?
+	GW::MATH::GVECTORF lightColor = { 0.9f, 0.9f, 1, 1 };
+
+	// TODO: Part 2b // TODO: Part 4d
+	struct SHADER_SCENE_DATA
+	{
+		GW::MATH::GVECTORF lightDirection, lightColor;
+		GW::MATH::GMATRIXF viewMatrix, projectionMatrix;
+	};
+	SHADER_SCENE_DATA sceneData;
+
+	// TODO: Part 3a
+
 public:
 
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
@@ -66,7 +91,18 @@ public:
 		UpdateWindowDimensions();
 
 		// TODO: Part 2a
+		matrixMath.Create();
+		vlk.GetAspectRatio(aspectRatio);
+		createViewMatrix();
+		createProjectionMatrix(65);
+		createRotTranMatrix(65);
+
 		// TODO: Part 2b // TODO: Part 4d
+		sceneData.lightColor = lightColor;
+		sceneData.lightDirection = lightDir;
+		sceneData.viewMatrix = cameraInvertedMatrix;
+		sceneData.projectionMatrix = projectionMatrix;
+
 		// TODO: part 3a
 
 		InitializeGraphics();
@@ -115,6 +151,29 @@ private:
 	{
 		// TODO: Part 1g
 		CreateIndexBuffer(&FSLogo_indices[0], sizeof(FSLogo_indices));
+	}
+
+	float DegreesToRadians(float degrees) {
+		return (degrees * (PI / 180.0f));
+	}
+
+	void createRotTranMatrix(float degrees) {
+		float rad = DegreesToRadians(degrees);
+
+		matrixMath.TranslateGlobalF(lightRotX, translateLight, lightRotX);
+		//matrixMath.RotateXGlobalF(lightRotX, rad, lightRotX);
+		matrixMath.LookAtLHF(lightRotX.row4, lightDir, upVec, lightRotX); //will this work?
+	}
+
+	void createViewMatrix() {
+		matrixMath.TranslateGlobalF(cameraMatrix, translateCamera, cameraMatrix);
+		matrixMath.LookAtLHF(cameraMatrix.row4, origin, upVec, cameraInvertedMatrix);
+	}
+
+	void createProjectionMatrix(float degrees) {
+		float rad = DegreesToRadians(degrees);
+
+		matrixMath.ProjectionVulkanLHF(rad, aspectRatio, 0.1f, 100, projectionMatrix);
 	}
 
 	void CreateVertexBuffer(const void* data, unsigned int sizeInBytes)

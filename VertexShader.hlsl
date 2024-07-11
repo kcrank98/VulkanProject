@@ -17,8 +17,9 @@ struct In_Vertex
 float4 main(In_Vertex inputVertex : POSITION) : SV_POSITION 
 {
 	// TODO: Part 1h
-    inputVertex.posH.y += -0.75f;
-    inputVertex.posH.z += 0.75f;
+    //inputVertex.posH.y += -0.75f;
+    //inputVertex.posH.z += 0.75f;
+	
 	// TODO: Part 3g
 	// TODO: Part 2f
 	// TODO: Part 3h
