@@ -154,6 +154,7 @@ private:
 		InitializeIndexBuffer();
 		// TODO: Part 2d // TODO: Part 3d
 		InitializeUniformBuffer();
+		InitializeStorageBuffer();
 		CompileShaders();
 		InitializeDescriptorSets();
 		InitializeGraphicsPipeline();
