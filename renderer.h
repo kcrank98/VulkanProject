@@ -51,6 +51,9 @@ class Renderer
 	std::vector<VkDeviceMemory> uniformDatas;
 
 	// TODO: Part 3d
+	std::vector<VkBuffer> storageHandles;
+	std::vector<VkDeviceMemory> storageDatas;
+
 	unsigned int windowWidth, windowHeight;
 
 	struct VEC3
@@ -89,6 +92,13 @@ class Renderer
 
 	unsigned swapChainCount;
 	// TODO: Part 3a
+	struct INSTANCE_DATA
+	{
+		GW::MATH::GMATRIXF worldMatrix;
+		OBJ_ATTRIBUTES material;
+	};
+	std::vector<INSTANCE_DATA> perFrame;
+
 
 public:
 
@@ -105,6 +115,9 @@ public:
 		descriptorSets.resize(swapChainCount);
 		uniformDatas.resize(swapChainCount);
 		uniformHandles.resize(swapChainCount);
+		storageHandles.resize(swapChainCount);
+		storageDatas.resize(swapChainCount);
+		perFrame.resize(swapChainCount);
 		createViewMatrix();
 		createProjectionMatrix(65);
 		createRotTranMatrix(65);
@@ -117,6 +130,10 @@ public:
 		sceneData.projectionMatrix = projectionMatrix;*/
 
 		// TODO: part 3a
+		for (int i = 0; i < perFrame.size(); ++i) {
+			perFrame[i].worldMatrix = GW::MATH::GIdentityMatrixF;
+			perFrame[i].material = FSLogo_materials[i].attrib;
+		}
 
 		InitializeGraphics();
 		BindShutdownCallback();
@@ -173,6 +190,11 @@ private:
 		CreateUniformBuffer(&sceneData, sizeof(SHADER_SCENE_DATA));
 	}
 
+	void InitializeStorageBuffer()
+	{
+		CreateStorageBuffer(perFrame.data(), sizeof(INSTANCE_DATA));
+	}
+
 	float DegreesToRadians(float degrees) {
 		return (degrees * (PI / 180.0f));
 	}
@@ -222,7 +244,17 @@ private:
 				&uniformHandles[i], &uniformDatas[i]);
 			GvkHelper::write_to_buffer(device, uniformDatas[i], _data, sizeInBytes);
 		}
+	}
 
+	void CreateStorageBuffer(const void* _data, unsigned int sizeInBytes)
+	{
+		for (unsigned i = 0; i < storageHandles.size(); i++)
+		{
+			GvkHelper::create_buffer(physicalDevice, device, sizeInBytes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				&storageHandles[i], &storageDatas[i]);
+			GvkHelper::write_to_buffer(device, storageDatas[i], _data, sizeInBytes);
+		}
 	}
 
 	void CompileShaders()
@@ -296,7 +328,7 @@ private:
 
 	void CreateDescriptorSetLayout() {
 
-		VkDescriptorSetLayoutBinding layoutBinding[1];
+		VkDescriptorSetLayoutBinding layoutBinding[2];
 		{
 			layoutBinding[0].binding = 0; // Binding number in the shader
 			layoutBinding[0].descriptorCount = 1;
@@ -304,11 +336,11 @@ private:
 			layoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 			layoutBinding[0].pImmutableSamplers = nullptr; // For sampled images
 
-			//layoutBinding[1].binding = 1; // Binding number in the shader
-			//layoutBinding[1].descriptorCount = 1;
-			//layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			//layoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-			//layoutBinding[1].pImmutableSamplers = nullptr; // For sampled images
+			layoutBinding[1].binding = 1; // Binding number in the shader
+			layoutBinding[1].descriptorCount = 1;
+			layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			layoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+			layoutBinding[1].pImmutableSamplers = nullptr; // For sampled images
 		};
 		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -326,16 +358,16 @@ private:
 
 		VkDescriptorPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, swapChainCount };
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
+		std::vector<VkDescriptorPoolSize> poolSize;
+		poolSize.resize(swapChainCount);
+		poolSize[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, swapChainCount };
+		poolSize[1] = { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, swapChainCount };
+		poolInfo.poolSizeCount = poolSize.size();
+		poolInfo.pPoolSizes = poolSize.data();
 		poolInfo.maxSets = swapChainCount;
 		poolInfo.flags = 0;
 		poolInfo.pNext = nullptr;
 		vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool);
-		/*poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSize.descriptorCount = swapChainCount;*/
-
 	}
 
 	void AllocateDescriptorSet() {
@@ -355,34 +387,18 @@ private:
 
 	void LinkDescriptorSet2Buffer() {
 
-		//VkDescriptorBufferInfo bufferInfo = {};
-		//bufferInfo.buffer = sceneDataHandles[0]; // Your storage buffer handle
-		////bufferInfo.buffer = vertexHandle;
-		//bufferInfo.offset = 0; // Offset within the buffer
-		//bufferInfo.range = VK_WHOLE_SIZE; // Size of the buffer
-
 		VkWriteDescriptorSet descriptorWrite = {};
 		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		//descriptorWrite.descriptorCount = descriptorSets.size(); // Number of descriptors to update
 		descriptorWrite.descriptorCount = 1; // Number of descriptors to update
 		descriptorWrite.dstArrayElement = 0; // First array element to update
 		descriptorWrite.dstBinding = 0; // The binding number in the shader
 		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // Type of the descriptor
-		//descriptorWrite.dstSet = descriptorSets[0]; // The descriptor set to update
-		//descriptorWrite.pBufferInfo = &bufferInfo; // Pointer to the buffer info
-
 		for (int i = 0; i < swapChainCount; ++i) {
 			descriptorWrite.dstSet = descriptorSets[i];
 			VkDescriptorBufferInfo dbinfo = { uniformHandles[i], 0, VK_WHOLE_SIZE };
 			descriptorWrite.pBufferInfo = &dbinfo;
 			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 		}
-
-		//descriptorWrite.pImageInfo = nullptr; // For image descriptors, not used here
-		//descriptorWrite.pTexelBufferView = nullptr; // For texel buffer views, not used here
-
-		// Update the descriptor set with the new buffer binding
-		//vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 
 	}
 
@@ -675,6 +691,7 @@ public:
 
 		// TODO: Part 2e
 		GvkHelper::write_to_buffer(device, uniformDatas[0], &sceneData, sizeof(sceneData));
+		GvkHelper::write_to_buffer(device, storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipelineLayout, 0, 1, &descriptorSets[0], 0, NULL);
 
@@ -743,6 +760,13 @@ private:
 		}
 
 		// TODO: Part 3d
+		for (auto& i : storageHandles) {
+			vkDestroyBuffer(device, i, nullptr);
+		}
+		for (auto& i : storageDatas) {
+			vkFreeMemory(device, i, nullptr);
+		}
+
 		vkDestroyBuffer(device, vertexHandle, nullptr);
 		vkFreeMemory(device, vertexData, nullptr);
 		vkDestroyShaderModule(device, vertexShader, nullptr);

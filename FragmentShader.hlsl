@@ -7,6 +7,32 @@ cbuffer SHADER_SCENE_DATA
 };
 
 // TODO: Part 3b
+struct VEC3
+{
+    float x, y, z;
+};
+
+struct OBJ_ATTRIBUTES
+{
+    VEC3 Kd; // diffuse reflectivity
+    float d; // dissolve (transparency) 
+    VEC3 Ks; // specular reflectivity
+    float Ns; // specular exponent
+    VEC3 Ka; // ambient reflectivity
+    float sharpness; // local reflection map sharpness
+    VEC3 Tf; // transmission filter
+    float Ni; // optical density (index of refraction)
+    VEC3 Ke; // emissive reflectivity
+    uint illum; // illumination model
+};
+
+struct INSTANCE_DATA
+{
+    matrix worldMatrix;
+    OBJ_ATTRIBUTES material;
+};
+StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b1, space0);
+
 // TODO: Part 3c
 // TODO: Part 4a (optional)
 // TODO: Part 4b
