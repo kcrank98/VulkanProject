@@ -111,10 +111,10 @@ public:
 
 		// TODO: Part 2b // TODO: Part 4d
 		//SHADER_SCENE_DATA sceneData;
-		sceneData.lightColor = lightColor;
+		/*sceneData.lightColor = lightColor;
 		sceneData.lightDirection = lightDir;
 		sceneData.viewMatrix = cameraInvertedMatrix;
-		sceneData.projectionMatrix = projectionMatrix;
+		sceneData.projectionMatrix = projectionMatrix;*/
 
 		// TODO: part 3a
 
