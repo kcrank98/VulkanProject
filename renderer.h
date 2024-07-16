@@ -660,21 +660,25 @@ private:
 			});
 	}
 
-	//void Update()
-	//{
-	//	// Adjust CPU data to reflect what we want to draw
-	//	for (int i = 0; i < 240; ++i) {
-	//		GW::MATH::GMatrix::RotateZLocalF(instanceData.instance_transforms[i],
-	//			0.0001f, instanceData.instance_transforms[i]);
-	//	}
-	//	// Copy data to this frame's buffer
-	//	unsigned int currentBuffer;
-	//	vlk.GetSwapchainCurrentImage(currentBuffer);
-	//	GvkHelper::write_to_buffer(device,
-	//		uniformData[currentBuffer], &instanceData, sizeof(INSTANCE_UNIFORMS));
-	//}
 
 public:
+
+	void Update()
+	{
+		// Adjust CPU data to reflect what we want to draw
+		/*for (int i = 0; i < 240; ++i) {
+			GW::MATH::GMatrix::RotateZLocalF(instanceData.instance_transforms[i],
+				0.0001f, instanceData.instance_transforms[i]);
+		}*/
+		// Copy data to this frame's buffer
+		unsigned int currentBuffer;
+		vlk.GetSwapchainCurrentImage(currentBuffer);
+		GvkHelper::write_to_buffer(device,
+			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
+		GvkHelper::write_to_buffer(device,
+			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
+	}
+
 	void Render()
 	{
 		// TODO: Part 3i
@@ -691,8 +695,8 @@ public:
 		vkCmdBindIndexBuffer(commandBuffer, indexHandle, 0, VK_INDEX_TYPE_UINT32);
 
 		// TODO: Part 2e
-		GvkHelper::write_to_buffer(device, uniformDatas[0], &sceneData, sizeof(sceneData));
-		GvkHelper::write_to_buffer(device, storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));
+		/*GvkHelper::write_to_buffer(device, uniformDatas[0], &sceneData, sizeof(sceneData));
+		GvkHelper::write_to_buffer(device, storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));*/
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipelineLayout, 0, 1, &descriptorSets[0], 0, NULL);
 

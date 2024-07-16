@@ -41,8 +41,10 @@ StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b1, space0);
 float4 main() : SV_TARGET
 {
 	// TODO: Part 3e
+    float4 clr = float4(DrawInfo[0].material.Kd.x, DrawInfo[0].material.Kd.y, DrawInfo[0].material.Kd.z, 1.0f);
 	// TODO: Part 3h
-    return float4(1.0f, 1.0f, 1.0f, 0); // TODO: Part 1a (optional)
+   // return float4(1.0f, 1.0f, 1.0f, 0); // TODO: Part 1a (optional)
+    return clr;
 	// TODO: Part 4c
 	// TODO: Part 4d (half-vector or reflect method, your choice)
 }
