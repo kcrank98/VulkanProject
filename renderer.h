@@ -674,9 +674,9 @@ public:
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		GvkHelper::write_to_buffer(device,
-			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
+			uniformDatas[0], &sceneData, sizeof(sceneData));
 		GvkHelper::write_to_buffer(device,
-			storageDatas[currentBuffer], &perFrame, sizeof(INSTANCE_DATA));
+			storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));
 	}
 
 	void Render()
