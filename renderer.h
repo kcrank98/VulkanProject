@@ -697,6 +697,7 @@ public:
 		// TODO: Part 2e
 		/*GvkHelper::write_to_buffer(device, uniformDatas[0], &sceneData, sizeof(sceneData));
 		GvkHelper::write_to_buffer(device, storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));*/
+		Update();
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipelineLayout, 0, 1, &descriptorSets[0], 0, NULL);
 
