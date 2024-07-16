@@ -674,13 +674,18 @@ public:
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		GvkHelper::write_to_buffer(device,
-			uniformDatas[0], &sceneData, sizeof(sceneData));
+			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
 		GvkHelper::write_to_buffer(device,
-			storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));
+			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
 	}
 
 	void Render()
 	{
+		unsigned int currentBuffer;
+		vlk.GetSwapchainCurrentImage(currentBuffer);
+		VkCommandBuffer commandBuffer;
+		vlk.GetCommandBuffer(currentBuffer, (void**)&commandBuffer);
+
 		// TODO: Part 3i
 		// TODO: Part 2a
 		sceneData.lightColor = lightColor;
@@ -688,7 +693,7 @@ public:
 		sceneData.viewMatrix = cameraInvertedMatrix;
 		sceneData.projectionMatrix = projectionMatrix;
 
-		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
+		//VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
 		// TODO: Part 3i
 		// TODO: Part 1h
@@ -699,7 +704,7 @@ public:
 		GvkHelper::write_to_buffer(device, storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));*/
 		Update();
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout, 0, 1, &descriptorSets[0], 0, NULL);
+			pipelineLayout, 0, 1, &descriptorSets[currentBuffer], 0, NULL);
 
 		// TODO: Part 3f
 		vkCmdDrawIndexed(commandBuffer, ARRAYSIZE(FSLogo_indices), 1, 0, 0, 0); // TODO: Part 1d
