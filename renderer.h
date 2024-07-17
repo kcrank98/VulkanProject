@@ -772,11 +772,11 @@ public:
 		// TODO: Part 2e
 		/*GvkHelper::write_to_buffer(device, uniformDatas[0], &sceneData, sizeof(sceneData));
 		GvkHelper::write_to_buffer(device, storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));*/
-		Update();
+		//Update();
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipelineLayout, 0, 1, &uniformDescriptorSets[currentBuffer], 0, NULL);
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout, 1, 2, &storageDescriptorSets[currentBuffer], 0, NULL);
+			pipelineLayout, 1, 1, &storageDescriptorSets[currentBuffer], 0, NULL);
 
 		// TODO: Part 3f
 		vkCmdDrawIndexed(commandBuffer, ARRAYSIZE(FSLogo_indices), 1, 0, 0, 0); // TODO: Part 1d

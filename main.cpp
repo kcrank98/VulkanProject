@@ -54,7 +54,7 @@ int main()
 			{
 				if (+vulkan.StartFrame(2, clrAndDepth))
 				{
-					//renderer.Update();
+					renderer.Update();
 					renderer.Render();
 					vulkan.EndFrame(true);
 				}
