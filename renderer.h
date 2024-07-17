@@ -43,14 +43,17 @@ class Renderer
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout pipelineLayout = nullptr;
 	// TODO: Part 2d
-	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorSetLayout uniformDescriptorSetLayout;
 	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
+	std::vector<VkDescriptorSet> uniformDescriptorSets;
 
 	std::vector<VkBuffer> uniformHandles;
 	std::vector<VkDeviceMemory> uniformDatas;
 
 	// TODO: Part 3d
+	VkDescriptorSetLayout storageDescriptorSetLayout;
+	std::vector<VkDescriptorSet> storageDescriptorSets;// storage descriptors
+
 	std::vector<VkBuffer> storageHandles;
 	std::vector<VkDeviceMemory> storageDatas;
 
@@ -112,7 +115,8 @@ public:
 		matrixMath.Create();
 		vlk.GetAspectRatio(aspectRatio);
 		vlk.GetSwapchainImageCount(swapChainCount);
-		descriptorSets.resize(swapChainCount);
+		uniformDescriptorSets.resize(swapChainCount);
+		storageDescriptorSets.resize(swapChainCount);
 		uniformDatas.resize(swapChainCount);
 		uniformHandles.resize(swapChainCount);
 		storageHandles.resize(swapChainCount);
@@ -329,33 +333,46 @@ private:
 
 	void CreateDescriptorSetLayout() {
 
-		VkDescriptorSetLayoutBinding layoutBinding[2];
-		{
-			layoutBinding[0].binding = 0; // Binding number in the shader
-			layoutBinding[0].descriptorCount = 1;
-			layoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			layoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-			layoutBinding[0].pImmutableSamplers = nullptr; // For sampled images
+		VkDescriptorSetLayoutBinding uniform_layoutBinding = {};
+		
+		uniform_layoutBinding.binding = 0; // Binding number in the shader
+		uniform_layoutBinding.descriptorCount = 1;
+		uniform_layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uniform_layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		uniform_layoutBinding.pImmutableSamplers = nullptr; // For sampled images
 
-			layoutBinding[1].binding = 1; // Binding number in the shader
-			layoutBinding[1].descriptorCount = 1;
-			layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			layoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-			layoutBinding[1].pImmutableSamplers = nullptr; // For sampled images
-		};
+		//layoutBinding[1].binding = 1; // Binding number in the shader
+		//layoutBinding[1].descriptorCount = 1;
+		//layoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		//layoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		//layoutBinding[1].pImmutableSamplers = nullptr; // For sampled images
+		
 		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		layoutInfo.flags = 0; //maybe?
-		layoutInfo.bindingCount = ARRAYSIZE(layoutBinding);
-		layoutInfo.pBindings = layoutBinding;
+		layoutInfo.bindingCount = 1;
+		layoutInfo.pBindings = &uniform_layoutBinding;
 		layoutInfo.pNext = nullptr; //maybe?
 
-		auto result = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout);
+		auto r = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &uniformDescriptorSetLayout);
 		int h = 90;
+
+		VkDescriptorSetLayoutBinding storage_layoutBinding = {};
+
+		storage_layoutBinding.binding = 0; // Binding number in the shader
+		storage_layoutBinding.descriptorCount = 1;
+		storage_layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		storage_layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		storage_layoutBinding.pImmutableSamplers = nullptr;
+		layoutInfo.pBindings = &storage_layoutBinding;
+
+		auto s = vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &storageDescriptorSetLayout);
+		int i = 90;
 
 	}
 
 	void CreateDescriptorPool() {
+		unsigned int total_descriptorsets = uniformHandles.size() + storageHandles.size();
 
 		VkDescriptorPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -365,7 +382,7 @@ private:
 		poolSize[1] = { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, swapChainCount };
 		poolInfo.poolSizeCount = poolSize.size();
 		poolInfo.pPoolSizes = poolSize.data();
-		poolInfo.maxSets = swapChainCount;
+		poolInfo.maxSets = total_descriptorsets;
 		poolInfo.flags = 0;
 		poolInfo.pNext = nullptr;
 		vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool);
@@ -373,41 +390,93 @@ private:
 
 	void AllocateDescriptorSet() {
 
-		VkDescriptorSetAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorSetCount = 1;
-		allocInfo.pSetLayouts = &descriptorSetLayout;
-		allocInfo.descriptorPool = descriptorPool;
-		allocInfo.pNext = nullptr;
+		/*VkDescriptorSetAllocateInfo uniform_allocInfo = {};
+		uniform_allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		uniform_allocInfo.descriptorSetCount = 1;
+		uniform_allocInfo.pSetLayouts = &uniformDescriptorSetLayout;
+		uniform_allocInfo.descriptorPool = descriptorPool;
+		uniform_allocInfo.pNext = nullptr;
 
-		for (auto& i : descriptorSets) {
-			auto result = vkAllocateDescriptorSets(device, &allocInfo, &i);
+		VkDescriptorSetAllocateInfo storage_allocInfo = {};
+		storage_allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		storage_allocInfo.descriptorSetCount = 1;
+		storage_allocInfo.pSetLayouts = &storageDescriptorSetLayout;
+		storage_allocInfo.descriptorPool = descriptorPool;
+		storage_allocInfo.pNext = nullptr;
+
+		for (auto& i : uniformDescriptorSets) {
+			auto result = vkAllocateDescriptorSets(device, &uniform_allocInfo, &i);
 			int k = 69;
 		}
+		for (auto& i : storageDescriptorSets) {
+			auto result = vkAllocateDescriptorSets(device, &storage_allocInfo, &i);
+			int k = 96;
+		}*/
 	}
 
 	void LinkDescriptorSet2Buffer() {
 
-		VkWriteDescriptorSet descriptorWrite = {};
-		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite.descriptorCount = 1; // Number of descriptors to update
-		descriptorWrite.dstArrayElement = 0; // First array element to update
-		descriptorWrite.dstBinding = 0; // The binding number in the shader
-		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // Type of the descriptor
+		VkDescriptorSetAllocateInfo uniform_allocInfo = {};
+		uniform_allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		uniform_allocInfo.descriptorSetCount = 1;
+		uniform_allocInfo.pSetLayouts = &uniformDescriptorSetLayout;
+		uniform_allocInfo.descriptorPool = descriptorPool;
+		uniform_allocInfo.pNext = nullptr;
+
+		VkDescriptorSetAllocateInfo storage_allocInfo = {};
+		storage_allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		storage_allocInfo.descriptorSetCount = 1;
+		storage_allocInfo.pSetLayouts = &storageDescriptorSetLayout;
+		storage_allocInfo.descriptorPool = descriptorPool;
+		storage_allocInfo.pNext = nullptr;
+
+		//for (auto& i : uniformDescriptorSets) {
+		//	//auto result = vkAllocateDescriptorSets(device, &uniform_allocInfo, &i);
+		//	int k = 69;
+		//}
+		//for (auto& i : storageDescriptorSets) {
+		//	//auto result = vkAllocateDescriptorSets(device, &storage_allocInfo, &i);
+		//	int k = 96;
+		//}
+
+		VkWriteDescriptorSet uniform_descriptorWrite = {};
+		uniform_descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		uniform_descriptorWrite.descriptorCount = 1; // Number of descriptors to update
+		uniform_descriptorWrite.dstArrayElement = 0; // First array element to update
+		uniform_descriptorWrite.dstBinding = 0; // The binding number in the shader
+		uniform_descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // Type of the descriptor
+		VkDescriptorBufferInfo uniform_dbinfo = { nullptr, 0, VK_WHOLE_SIZE };
+		uniform_descriptorWrite.pBufferInfo = &uniform_dbinfo;
 		for (int i = 0; i < swapChainCount; ++i) {
-			descriptorWrite.dstSet = descriptorSets[i];
-			VkDescriptorBufferInfo dbinfo = { uniformHandles[i], 0, VK_WHOLE_SIZE };
-			descriptorWrite.pBufferInfo = &dbinfo;
-			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+			auto r = vkAllocateDescriptorSets(device, &uniform_allocInfo, &uniformDescriptorSets[i]);
+			//auto s = vkAllocateDescriptorSets(device, &storage_allocInfo, &storageDescriptorSets[i]);
+			uniform_descriptorWrite.dstSet = uniformDescriptorSets[i];
+			uniform_dbinfo.buffer = uniformHandles[i];
+			vkUpdateDescriptorSets(device, 1, &uniform_descriptorWrite, 0, nullptr);
 		}
 
+		VkWriteDescriptorSet storage_descriptorWrite = {};
+		storage_descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		storage_descriptorWrite.descriptorCount = 1; // Number of descriptors to update
+		storage_descriptorWrite.dstArrayElement = 0; // First array element to update
+		storage_descriptorWrite.dstBinding = 0; // The binding number in the shader
+		storage_descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // Type of the descriptor
+		VkDescriptorBufferInfo storage_dbinfo = { nullptr, 0, VK_WHOLE_SIZE };
+		storage_descriptorWrite.pBufferInfo = &storage_dbinfo;
+		for (int i = 0; i < swapChainCount; ++i) {
+			auto r = vkAllocateDescriptorSets(device, &storage_allocInfo, &storageDescriptorSets[i]);
+			//auto s = vkAllocateDescriptorSets(device, &storage_allocInfo, &storageDescriptorSets[i]);
+			storage_descriptorWrite.dstSet = storageDescriptorSets[i];
+			storage_dbinfo.buffer = storageHandles[i];
+			vkUpdateDescriptorSets(device, 1, &storage_descriptorWrite, 0, nullptr);
+		}
 	}
 
 	void InitializeDescriptorSets() {
 
 		CreateDescriptorSetLayout();
 		CreateDescriptorPool();
-		AllocateDescriptorSet();
+		//AllocateDescriptorSet();
 		LinkDescriptorSet2Buffer();
 
 	}
@@ -642,12 +711,13 @@ private:
 		// TODO: Part 2d // TODO: Part 3d
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
 		pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipeline_layout_create_info.setLayoutCount = 1;
-		pipeline_layout_create_info.pSetLayouts = &descriptorSetLayout;
+		pipeline_layout_create_info.setLayoutCount = 2;
+		VkDescriptorSetLayout layouts[2] = { uniformDescriptorSetLayout, storageDescriptorSetLayout };
+		pipeline_layout_create_info.pSetLayouts = layouts;
 		pipeline_layout_create_info.pushConstantRangeCount = 0;
 		pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
-		vkCreatePipelineLayout(device, &pipeline_layout_create_info,nullptr, &pipelineLayout);
+		vkCreatePipelineLayout(device, &pipeline_layout_create_info, nullptr, &pipelineLayout);
 	}
 
 	void BindShutdownCallback()
@@ -704,9 +774,9 @@ public:
 		GvkHelper::write_to_buffer(device, storageDatas[0], perFrame.data(), sizeof(INSTANCE_DATA));*/
 		Update();
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout, 0, 1, &descriptorSets[currentBuffer], 0, NULL);
+			pipelineLayout, 0, 1, &uniformDescriptorSets[currentBuffer], 0, NULL);
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout, 1, 1, &descriptorSets[currentBuffer], 0, NULL);
+			pipelineLayout, 1, 1, &storageDescriptorSets[currentBuffer], 0, NULL);
 
 		// TODO: Part 3f
 		vkCmdDrawIndexed(commandBuffer, ARRAYSIZE(FSLogo_indices), 1, 0, 0, 0); // TODO: Part 1d
@@ -762,7 +832,8 @@ private:
 		vkFreeMemory(device, indexData, nullptr);
 
 		// TODO: Part 2d
-		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(device, uniformDescriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(device, storageDescriptorSetLayout, nullptr);
 		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
 		for (auto& i : uniformHandles) {

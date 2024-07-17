@@ -15,7 +15,7 @@ struct Out_Vertex
 };
 
 // TODO: Part 2c // TODO: Part 4d
-cbuffer SHADER_SCENE_DATA
+cbuffer SHADER_SCENE_DATA : register(b0, space0)
 {
     float4 lightDirection, lightColor;
     matrix viewMatrix, projectionMatrix;
@@ -46,7 +46,7 @@ struct INSTANCE_DATA
     matrix worldMatrix;
     OBJ_ATTRIBUTES material;
 };
-StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b1, space0);
+StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b0, space1);
 
 // TODO: Part 3c
 // TODO: Part 4a
