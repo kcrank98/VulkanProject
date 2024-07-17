@@ -465,7 +465,6 @@ private:
 		storage_descriptorWrite.pBufferInfo = &storage_dbinfo;
 		for (int i = 0; i < swapChainCount; ++i) {
 			auto r = vkAllocateDescriptorSets(device, &storage_allocInfo, &storageDescriptorSets[i]);
-			//auto s = vkAllocateDescriptorSets(device, &storage_allocInfo, &storageDescriptorSets[i]);
 			storage_descriptorWrite.dstSet = storageDescriptorSets[i];
 			storage_dbinfo.buffer = storageHandles[i];
 			vkUpdateDescriptorSets(device, 1, &storage_descriptorWrite, 0, nullptr);
