@@ -40,7 +40,7 @@ StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b0, space1);
 // TODO: Part 3h
 struct Out_Vertex
 {
-    float4 posH : POSITION;
+    float4 posH : SV_POSITION;
     float4 clr : COLOR;
     float4 nrm : NORMAL;
     nointerpolation uint index : INDEX;
@@ -49,10 +49,10 @@ struct Out_Vertex
 float4 main(Out_Vertex input) : SV_TARGET
 {
 	// TODO: Part 3e
-    float4 clr = float4(DrawInfo[input.index].material.Kd.x, DrawInfo[input.index].material.Kd.y, DrawInfo[input.index].material.Kd.z, 1.0f);
+    input.clr = float4(DrawInfo[input.index].material.Kd.x, DrawInfo[input.index].material.Kd.y, DrawInfo[input.index].material.Kd.z, 1.0f);
 	// TODO: Part 3h
    // return float4(1.0f, 1.0f, 1.0f, 0); // TODO: Part 1a (optional)
-    return clr;
+    return input.clr;
 	// TODO: Part 4c
 	// TODO: Part 4d (half-vector or reflect method, your choice)
 }

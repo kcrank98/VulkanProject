@@ -9,7 +9,7 @@ struct In_Vertex
 
 struct Out_Vertex
 {
-    float4 posH : POSITION;
+    float4 posH : SV_POSITION;
     float4 clr : COLOR;
     float4 nrm : NORMAL;
     nointerpolation uint index : INDEX;
@@ -54,8 +54,8 @@ StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b0, space1);
 // TODO: Part 4b
 // TODO: Part 3g
 // TODO: Part 3h
-Out_Vertex main(In_Vertex inputVertex : POSITION,
-    uint matrix_index : SV_InstanceID) : SV_POSITION
+Out_Vertex main(In_Vertex inputVertex,
+    uint matrix_index : SV_InstanceID)
 {
 	// TODO: Part 1h
     //inputVertex.posH.y += -0.75f;
@@ -71,6 +71,8 @@ Out_Vertex main(In_Vertex inputVertex : POSITION,
     outputVertex.posH = mul(projectionMatrix, outputVertex.posH);
 	// TODO: Part 3h
     outputVertex.index = matrix_index;
+    outputVertex.nrm = float4(inputVertex.nrm, 0.0f);
+    outputVertex.clr = float4(inputVertex.clr, 1.0f);
 	// TODO: Part 4b
     return outputVertex;
 }

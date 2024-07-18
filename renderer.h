@@ -783,7 +783,7 @@ public:
 		for (int i = 0; i < ARRAYSIZE(FSLogo_meshes); ++i) {
 
 			vkCmdDrawIndexed(commandBuffer, FSLogo_meshes[i].indexCount,
-				1, FSLogo_meshes[i].indexOffset, 0, 0);
+				1, FSLogo_meshes[i].indexOffset, 0, i);
 		}
 
 	}
