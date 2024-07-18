@@ -744,10 +744,13 @@ public:
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		GvkHelper::write_to_buffer(device,
 			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
-		for (int i = 0; i < swapChainCount; ++i) {
+		/*for (int i = 0; i < swapChainCount; ++i) {
 			GvkHelper::write_to_buffer(device,
 				storageDatas[i], &perFrame[i], sizeof(INSTANCE_DATA));
-		}
+		}*/
+
+		GvkHelper::write_to_buffer(device,
+			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
 	}
 
 	void Render()
