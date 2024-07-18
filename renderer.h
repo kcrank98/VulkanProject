@@ -735,13 +735,13 @@ public:
 	void Update()
 	{
 		// Adjust CPU data to reflect what we want to draw
-		for (int i = 0; i < 2; ++i) {
+		/*for (int i = 0; i < 2; ++i) {
 			GW::MATH::GMatrix::RotateYLocalF(perFrame[i].worldMatrix,
 				0.0001f, perFrame[i].worldMatrix);
-		}
+		}*/
 
-		/*GW::MATH::GMatrix::RotateYLocalF(perFrame[1].worldMatrix,
-			0.0001f, perFrame[1].worldMatrix);*/
+		GW::MATH::GMatrix::RotateYLocalF(perFrame[1].worldMatrix,
+			0.0001f, perFrame[1].worldMatrix);
 
 		// Copy data to this frame's buffer
 		unsigned int currentBuffer;
