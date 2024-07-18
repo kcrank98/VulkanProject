@@ -740,7 +740,7 @@ public:
 				0.0001f, perFrame[i].worldMatrix);
 		}*/
 
-		GW::MATH::GMatrix::RotateYLocalF(perFrame[1].worldMatrix,
+		GW::MATH::GMatrix::RotateYLocalF(perFrame[0].worldMatrix,
 			0.0001f, perFrame[1].worldMatrix);
 
 		// Copy data to this frame's buffer
@@ -765,9 +765,6 @@ public:
 		sceneData.lightDirection = lightDir;
 		sceneData.viewMatrix = cameraInvertedMatrix;
 		sceneData.projectionMatrix = projectionMatrix;
-
-		GW::MATH::GMatrix::RotateYLocalF(perFrame[1].worldMatrix,
-			0.0001f, perFrame[1].worldMatrix);
 
 		//VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
