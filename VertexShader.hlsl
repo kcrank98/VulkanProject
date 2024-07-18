@@ -53,7 +53,8 @@ StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b0, space1);
 // TODO: Part 4b
 // TODO: Part 3g
 // TODO: Part 3h
-float4 main(In_Vertex inputVertex : POSITION) : SV_POSITION 
+float4 main(In_Vertex inputVertex : POSITION,
+    uint matrix_index : SV_InstanceID) : SV_POSITION
 {
 	// TODO: Part 1h
     //inputVertex.posH.y += -0.75f;
@@ -64,6 +65,7 @@ float4 main(In_Vertex inputVertex : POSITION) : SV_POSITION
 	
 	// TODO: Part 3g
 	// TODO: Part 2f
+    outputVertex.posH = mul(DrawInfo[matrix_index].worldMatrix, outputVertex.posH);
     outputVertex.posH = mul(viewMatrix, outputVertex.posH);
     outputVertex.posH = mul(projectionMatrix, outputVertex.posH);
 	// TODO: Part 3h

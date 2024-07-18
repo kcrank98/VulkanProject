@@ -780,22 +780,6 @@ public:
 		// TODO: Part 3f
 		//vkCmdDrawIndexed(commandBuffer, ARRAYSIZE(FSLogo_indices), 1, 0, 0, 0); // TODO: Part 1d
 
-		//for (auto& ins : FSLogo_meshes) {
-		//	//auto& model = myLevel->levelModels[ins.modelIndex];
-		//	auto& model = FSLogo_meshes[ins.materialIndex];
-
-		//	int meshEnd = model.indexOffset + model.indexCount;
-		//	for (int mesh = model.indexOffset; mesh < meshEnd; ++mesh) {
-
-		//		auto& msh = FSLogo_meshes[mesh];
-		//		/*varIndex.worldMatrixId = ins.transformStart;
-		//		varIndex.materialMatrixId = model.materialStart + msh.materialIndex;*/
-		//		vkCmdDrawIndexed(commandBuffer, msh.indexCount, ins.indexCount,
-		//			model.indexStart, model.vertexStart, 0);
-
-		//	}
-		//}
-
 		for (int i = 0; i < ARRAYSIZE(FSLogo_meshes); ++i) {
 
 			vkCmdDrawIndexed(commandBuffer, FSLogo_meshes[i].indexCount,
