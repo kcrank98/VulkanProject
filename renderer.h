@@ -748,8 +748,8 @@ public:
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		GvkHelper::write_to_buffer(device,
 			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
-		GvkHelper::write_to_buffer(device,
-			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
+		/*GvkHelper::write_to_buffer(device,
+			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));*/
 	}
 
 	void Render()
@@ -772,6 +772,9 @@ public:
 		//VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
 		// TODO: Part 3i
+		GvkHelper::write_to_buffer(device,
+			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
+
 		// TODO: Part 1h
 		vkCmdBindIndexBuffer(commandBuffer, indexHandle, 0, VK_INDEX_TYPE_UINT32);
 
