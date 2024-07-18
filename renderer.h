@@ -743,6 +743,9 @@ public:
 		GW::MATH::GMatrix::RotateYLocalF(perFrame[1].worldMatrix,
 			0.0001f, perFrame[1].worldMatrix);
 
+		GW::MATH::GMatrix::RotateYLocalF(sceneData.viewMatrix,
+			0.0001f, sceneData.viewMatrix);
+
 		// Copy data to this frame's buffer
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
