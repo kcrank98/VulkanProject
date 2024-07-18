@@ -740,8 +740,8 @@ public:
 				0.0001f, perFrame[i].worldMatrix);
 		}*/
 
-		matrixMath.RotateYLocalF(perFrame[1].worldMatrix,
-			0.0001f, perFrame[1].worldMatrix);
+		/*matrixMath.RotateYLocalF(perFrame[1].worldMatrix,
+			0.0001f, perFrame[1].worldMatrix);*/
 
 		// Copy data to this frame's buffer
 		unsigned int currentBuffer;
@@ -760,6 +760,9 @@ public:
 		vlk.GetCommandBuffer(currentBuffer, (void**)&commandBuffer);
 
 		// TODO: Part 3i
+		matrixMath.RotateYLocalF(perFrame[1].worldMatrix,
+			0.0001f, perFrame[1].worldMatrix);
+
 		// TODO: Part 2a
 		sceneData.lightColor = lightColor;
 		sceneData.lightDirection = lightDir;
