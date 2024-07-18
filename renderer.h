@@ -746,7 +746,7 @@ public:
 			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
 		for (int i = 0; i < swapChainCount; ++i) {
 			GvkHelper::write_to_buffer(device,
-				storageDatas[currentBuffer], &perFrame[i], sizeof(INSTANCE_DATA));
+				storageDatas[i], &perFrame[i], sizeof(INSTANCE_DATA));
 		}
 	}
 
