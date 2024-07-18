@@ -197,7 +197,7 @@ private:
 
 	void InitializeStorageBuffer()
 	{
-		CreateStorageBuffer(perFrame.data(), sizeof(INSTANCE_DATA)); // times size by 2!
+		CreateStorageBuffer(perFrame.data(), sizeof(INSTANCE_DATA) * 2); // times size by 2!
 	}
 
 	float DegreesToRadians(float degrees) {
