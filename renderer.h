@@ -735,10 +735,14 @@ public:
 	void Update()
 	{
 		// Adjust CPU data to reflect what we want to draw
-		/*for (int i = 0; i < 240; ++i) {
-			GW::MATH::GMatrix::RotateZLocalF(instanceData.instance_transforms[i],
-				0.0001f, instanceData.instance_transforms[i]);
-		}*/
+		for (int i = 0; i < 2; ++i) {
+			GW::MATH::GMatrix::RotateZLocalF(perFrame[i].worldMatrix,
+				0.0001f, perFrame[i].worldMatrix);
+		}
+
+		/*GW::MATH::GMatrix::RotateZLocalF(perFrame[1].worldMatrix,
+			0.0001f, perFrame[1].worldMatrix);*/
+
 		// Copy data to this frame's buffer
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
