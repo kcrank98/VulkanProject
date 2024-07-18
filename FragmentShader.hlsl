@@ -38,10 +38,18 @@ StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b0, space1);
 // TODO: Part 4b
 // TODO: Part 3g
 // TODO: Part 3h
-float4 main() : SV_TARGET
+struct Out_Vertex
+{
+    float4 posH : POSITION;
+    float4 clr : COLOR;
+    float4 nrm : NORMAL;
+    nointerpolation uint index : INDEX;
+};
+
+float4 main(Out_Vertex input) : SV_TARGET
 {
 	// TODO: Part 3e
-    float4 clr = float4(DrawInfo[0].material.Kd.x, DrawInfo[0].material.Kd.y, DrawInfo[0].material.Kd.z, 1.0f);
+    float4 clr = float4(DrawInfo[input.index].material.Kd.x, DrawInfo[input.index].material.Kd.y, DrawInfo[input.index].material.Kd.z, 1.0f);
 	// TODO: Part 3h
    // return float4(1.0f, 1.0f, 1.0f, 0); // TODO: Part 1a (optional)
     return clr;
