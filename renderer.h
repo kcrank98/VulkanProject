@@ -766,6 +766,9 @@ public:
 		sceneData.viewMatrix = cameraInvertedMatrix;
 		sceneData.projectionMatrix = projectionMatrix;
 
+		GW::MATH::GMatrix::RotateYLocalF(perFrame[1].worldMatrix,
+			0.0001f, perFrame[1].worldMatrix);
+
 		//VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
 		// TODO: Part 3i
