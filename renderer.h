@@ -748,8 +748,8 @@ public:
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		GvkHelper::write_to_buffer(device,
 			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
-		/*GvkHelper::write_to_buffer(device,
-			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));*/
+		GvkHelper::write_to_buffer(device,
+			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
 	}
 
 	void Render()
@@ -760,8 +760,8 @@ public:
 		vlk.GetCommandBuffer(currentBuffer, (void**)&commandBuffer);
 
 		// TODO: Part 3i
-		matrixMath.RotateYLocalF(perFrame[1].worldMatrix,
-			0.0001f, perFrame[1].worldMatrix);
+		matrixMath.RotateYLocalF(perFrame[0].worldMatrix,
+			0.0001f, perFrame[0].worldMatrix);
 
 		// TODO: Part 2a
 		sceneData.lightColor = lightColor;
@@ -772,9 +772,6 @@ public:
 		//VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
 		// TODO: Part 3i
-		GvkHelper::write_to_buffer(device,
-			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
-
 		// TODO: Part 1h
 		vkCmdBindIndexBuffer(commandBuffer, indexHandle, 0, VK_INDEX_TYPE_UINT32);
 
