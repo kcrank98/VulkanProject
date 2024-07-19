@@ -749,7 +749,7 @@ public:
 		GvkHelper::write_to_buffer(device,
 			uniformDatas[currentBuffer], &sceneData, sizeof(sceneData));
 		GvkHelper::write_to_buffer(device,
-			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA));
+			storageDatas[currentBuffer], perFrame.data(), sizeof(INSTANCE_DATA) * perFrame.size());
 	}
 
 	void Render()
