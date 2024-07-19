@@ -760,8 +760,8 @@ public:
 		vlk.GetCommandBuffer(currentBuffer, (void**)&commandBuffer);
 
 		// TODO: Part 3i
-		matrixMath.RotateYLocalF(perFrame[0].worldMatrix,
-			0.0001f, perFrame[0].worldMatrix);
+		matrixMath.RotateYLocalF(perFrame.data()->worldMatrix,
+			0.0001f, perFrame.data()->worldMatrix);
 
 		// TODO: Part 2a
 		sceneData.lightColor = lightColor;
