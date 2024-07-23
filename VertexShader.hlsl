@@ -78,7 +78,7 @@ Out_Vertex main(In_Vertex inputVertex,
     outputVertex.clr = float4(inputVertex.clr, 1.0f);
     
     // i think i need to do this?
-    camPos = mul(DrawInfo[matrix_index].worldMatrix, camPos);
+    //camPos = mul(DrawInfo[matrix_index].worldMatrix, camPos);
     
 	// TODO: Part 4b
     return outputVertex;
