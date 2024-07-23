@@ -2,7 +2,7 @@
 // TODO: Part 2c // TODO: Part 4d
 cbuffer SHADER_SCENE_DATA : register(b0, space0)
 {
-    float4 lightDirection, lightColor;
+    float4 lightDirection, lightColor, sunAmbient, camPos;
     matrix viewMatrix, projectionMatrix;
 };
 
@@ -41,6 +41,7 @@ StructuredBuffer<INSTANCE_DATA> DrawInfo : register(b0, space1);
 struct Out_Vertex
 {
     float4 posH : SV_POSITION;
+    float4 posW : WORLD;
     float4 clr : COLOR;
     float4 nrm : NORMAL;
     nointerpolation uint index : INDEX;
@@ -48,11 +49,55 @@ struct Out_Vertex
 
 float4 main(Out_Vertex input) : SV_TARGET
 {
-	// TODO: Part 3e
-    input.clr = float4(DrawInfo[input.index].material.Kd.x, DrawInfo[input.index].material.Kd.y, DrawInfo[input.index].material.Kd.z, 1.0f);
-	// TODO: Part 3h
-   // return float4(1.0f, 1.0f, 1.0f, 0); // TODO: Part 1a (optional)
-    return input.clr;
-	// TODO: Part 4c
-	// TODO: Part 4d (half-vector or reflect method, your choice)
+	// Normalize the light direction
+    float3 lightDir = normalize(lightDirection.xyz);
+    //float3 lightDir = normalize(input.posW.xyz);
+
+    // Normalize the normal
+    float3 normal = normalize(input.nrm.xyz);
+
+    // Lambertian diffuse term
+    float NdotL = max(dot(normal, -lightDir), 0.0);
+
+    // Get the diffuse reflectivity from the material
+    float3 diffuseColor = float3(DrawInfo[input.index].material.Kd.x,
+    DrawInfo[input.index].material.Kd.y, DrawInfo[input.index].material.Kd.z);
+
+    // Calculate the final color
+    float3 color = diffuseColor * lightColor.rgb * NdotL;
+    
+    float3 totalReflected = { 0.0f, 0.0f, 0.0f };
+    
+    //float3 sunAmbient = { 0.0f, 0.0f, 0.0f };
+    sunAmbient.x = lightColor.x * 0.25f;
+    sunAmbient.y = lightColor.y * 0.25f;
+    sunAmbient.z = lightColor.z * 0.35f;
+    
+    float3 ambient = { 0.0f, 0.0f, 0.0f };
+    ambient.x = DrawInfo[input.index].material.Ka.x;
+    ambient.y = DrawInfo[input.index].material.Ka.y;
+    ambient.z = DrawInfo[input.index].material.Ka.z;
+    float3 totalIndirect = ambient * sunAmbient.xyz;
+    //float3 direct = saturate(diffuseColor + totalIndirect);
+
+    float3 diffuse = { 0.0f, 0.0f, 0.0f };
+    diffuse.x = DrawInfo[input.index].material.Kd.x;
+    diffuse.y = DrawInfo[input.index].material.Kd.y;
+    diffuse.z = DrawInfo[input.index].material.Kd.z;
+    
+    float3 emissive = { 0.0f, 0.0f, 0.0f };
+    emissive.x = DrawInfo[input.index].material.Ke.x;
+    emissive.y = DrawInfo[input.index].material.Ke.y;
+    emissive.z = DrawInfo[input.index].material.Ke.z;
+    
+    //spec light
+    
+    
+    float3 saturated = saturate(color + totalIndirect);
+    
+    return float4((saturated * diffuse)
+    + totalReflected + emissive, input.clr.w);
+    
+    //return saturate(totalDirect + totalIndirect) * diffuse + totalReflected + emissive
+    
 }

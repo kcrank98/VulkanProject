@@ -88,7 +88,7 @@ class Renderer
 	// TODO: Part 2b // TODO: Part 4d
 	struct SHADER_SCENE_DATA
 	{
-		GW::MATH::GVECTORF lightDirection, lightColor;
+		GW::MATH::GVECTORF lightDirection, lightColor, sunAmbient, camPos;
 		GW::MATH::GMATRIXF viewMatrix, projectionMatrix;
 	};
 	SHADER_SCENE_DATA sceneData;
@@ -768,6 +768,8 @@ public:
 		sceneData.lightDirection = lightDir;
 		sceneData.viewMatrix = cameraInvertedMatrix;
 		sceneData.projectionMatrix = projectionMatrix;
+		sceneData.sunAmbient = { 0.0f, 0.0f, 0.0f, 0.0f };
+		sceneData.camPos = cameraMatrix.row4;
 
 		//VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);

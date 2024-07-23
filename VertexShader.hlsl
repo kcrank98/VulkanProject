@@ -10,6 +10,7 @@ struct In_Vertex
 struct Out_Vertex
 {
     float4 posH : SV_POSITION;
+    float4 posW : WORLD;
     float4 clr : COLOR;
     float4 nrm : NORMAL;
     nointerpolation uint index : INDEX;
@@ -18,7 +19,7 @@ struct Out_Vertex
 // TODO: Part 2c // TODO: Part 4d
 cbuffer SHADER_SCENE_DATA : register(b0, space0)
 {
-    float4 lightDirection, lightColor;
+    float4 lightDirection, lightColor, sunAmbient, camPos;
     matrix viewMatrix, projectionMatrix;
 };
 
@@ -67,12 +68,18 @@ Out_Vertex main(In_Vertex inputVertex,
 	// TODO: Part 3g
 	// TODO: Part 2f
     outputVertex.posH = mul(DrawInfo[matrix_index].worldMatrix, outputVertex.posH);
+    outputVertex.posW = outputVertex.posH;
     outputVertex.posH = mul(viewMatrix, outputVertex.posH);
     outputVertex.posH = mul(projectionMatrix, outputVertex.posH);
 	// TODO: Part 3h
     outputVertex.index = matrix_index;
-    outputVertex.nrm = float4(inputVertex.nrm, 0.0f);
+    //outputVertex.nrm = float4(inputVertex.nrm, 0.0f);
+    outputVertex.nrm = mul(DrawInfo[matrix_index].worldMatrix, float4(inputVertex.nrm, 0.0f));
     outputVertex.clr = float4(inputVertex.clr, 1.0f);
+    
+    // i think i need to do this?
+    camPos = mul(DrawInfo[matrix_index].worldMatrix, camPos);
+    
 	// TODO: Part 4b
     return outputVertex;
 }
