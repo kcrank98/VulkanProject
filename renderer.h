@@ -768,7 +768,12 @@ public:
 		sceneData.lightDirection = lightDir;
 		sceneData.viewMatrix = cameraInvertedMatrix;
 		sceneData.projectionMatrix = projectionMatrix;
-		sceneData.sunAmbient = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+		sceneData.sunAmbient.x = lightColor.x * 0.25f;
+		sceneData.sunAmbient.y = lightColor.y * 0.25f;
+		sceneData.sunAmbient.z = lightColor.z * 0.35f;
+		sceneData.sunAmbient.w = lightColor.w;
+
 		sceneData.camPos = cameraMatrix.row4;
 
 		//VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();

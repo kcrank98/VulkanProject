@@ -69,9 +69,9 @@ float4 main(Out_Vertex input) : SV_TARGET
     float3 totalReflected = { 0.0f, 0.0f, 0.0f };
     
     //float3 sunAmbient = { 0.0f, 0.0f, 0.0f };
-    sunAmbient.x = lightColor.x * 0.25f;
-    sunAmbient.y = lightColor.y * 0.25f;
-    sunAmbient.z = lightColor.z * 0.35f;
+    //sunAmbient.x = lightColor.x * 0.25f;
+    //sunAmbient.y = lightColor.y * 0.25f;
+    //sunAmbient.z = lightColor.z * 0.35f;
     
     float3 ambient = { 0.0f, 0.0f, 0.0f };
     ambient.x = DrawInfo[input.index].material.Ka.x;
