@@ -35,7 +35,7 @@ int main()
 			if (+e.Read(q) && q == GWindow::Events::RESIZE)
 				clrAndDepth[0].color.float32[2] += 0.00f; // disable
 			});
-		win.SetWindowName("Kain Cranker, Lab 4 - part 3 complete");
+		win.SetWindowName("Kain Cranker, Lab 4 - part 4 complete");
 		win.Register(msgs);
 #ifndef NDEBUG
 		const char* debugLayers[] = {

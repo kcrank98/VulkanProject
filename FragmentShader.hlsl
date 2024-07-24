@@ -91,12 +91,29 @@ float4 main(Out_Vertex input) : SV_TARGET
     emissive.z = DrawInfo[input.index].material.Ke.z;
     
     //spec light
+    float3 viewDir = { 0.0f, 0.0f, 0.0f };
+    float3 halfVector = { 0.0f, 0.0f, 0.0f };
+    float3 intensity = { 0.0f, 0.0f, 0.0f };
+    float3 zero = { 0.0f, 0.0f, 0.0f };
+    float3 maximum = { 1.0f, 1.0f, 1.0f };
+    float3 reflectedLight = { 0.0f, 0.0f, 0.0f };
     
+    float3 specIntensity = { 0.0f, 0.0f, 0.0f };
+    specIntensity.x = DrawInfo[input.index].material.Ks.x;
+    specIntensity.y = DrawInfo[input.index].material.Ks.y;
+    specIntensity.z = DrawInfo[input.index].material.Ks.z;
+    
+    viewDir = normalize(camPos.xyz - input.posW.xyz);
+    halfVector = normalize((-lightDir) + viewDir);
+    intensity = max(pow(clamp(dot(input.nrm.xyz, halfVector), zero, maximum), 
+        DrawInfo[input.index].material.Ns), zero);
+    reflectedLight = lightColor.xyz * specIntensity * intensity;
     
     float3 saturated = saturate(color + totalIndirect);
+    totalReflected = reflectedLight;
     
     return float4((saturated * diffuse)
-    + totalReflected + emissive, input.clr.w);
+        + totalReflected + emissive, input.clr.w);
     
     //return saturate(totalDirect + totalIndirect) * diffuse + totalReflected + emissive
     
